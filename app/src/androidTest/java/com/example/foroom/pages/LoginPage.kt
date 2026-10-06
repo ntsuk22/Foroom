@@ -2,11 +2,7 @@ package com.example.foroom.pages
 
 import android.view.View
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withChild
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -17,7 +13,6 @@ import com.example.foroom.Helper.waitUntilVisible
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.not
-import com.example.design_system.R as DesignR
 
 /**
  * Login screen elements and basic actions.
@@ -47,13 +42,9 @@ object LoginPage {
 
     fun typePassword(password: String) = typeInto(passwordEditText, password)
 
-    fun tapLogIn() {
-        onView(logInButton).waitUntilVisible(VIEW_TIMEOUT_SEC).perform(click())
-    }
+    fun tapLogIn() = tapWhenVisible(logInButton)
 
-    fun tapSignUp() {
-        onView(signUpButton).waitUntilVisible(VIEW_TIMEOUT_SEC).perform(click())
-    }
+    fun tapSignUp() = tapWhenVisible(signUpButton)
 
     fun waitForUserNameError(timeoutSec: Long = RESPONSE_TIMEOUT_SEC) = waitForError(userNameError, timeoutSec)
 
@@ -63,23 +54,7 @@ object LoginPage {
         onView(userNameError).check(matches(not(isDisplayed())))
     }
 
-    private fun typeInto(editText: Matcher<View>, text: String) {
-        onView(editText).waitUntilVisible(VIEW_TIMEOUT_SEC).perform(replaceText(text), closeSoftKeyboard())
-    }
-
     private fun waitForError(error: Matcher<View>, timeoutSec: Long) {
         onView(error).waitUntilVisible(timeoutSec).check(matches(not(withText(""))))
     }
 }
-
-/** The `inputEditText` inside the given custom `Input`. */
-internal fun inputEditText(input: Matcher<View>): Matcher<View> =
-    allOf(withId(DesignR.id.inputEditText), isDescendantOfA(input))
-
-/** The `descriptionTextView` (error/info text) inside the given custom `Input`. */
-internal fun inputDescription(input: Matcher<View>): Matcher<View> =
-    allOf(withId(DesignR.id.descriptionTextView), isDescendantOfA(input))
-
-internal const val VIEW_TIMEOUT_SEC = 5L
-internal const val SCREEN_TIMEOUT_SEC = 15L
-internal const val RESPONSE_TIMEOUT_SEC = 15L
