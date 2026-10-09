@@ -1,6 +1,7 @@
 package com.example.foroom.steps
 
 import com.example.foroom.pages.ChatsPage
+import com.example.foroom.pages.ConversationPage
 import com.example.foroom.pages.CreateChatPage
 
 /**
@@ -39,11 +40,11 @@ object ChatSteps {
     }
 
     fun checkOpenedChat(name: String) {
-        ChatsPage.waitForOpenedChat(name)
+        ConversationPage.waitForChatTitle(name)
     }
 
     fun closeChat() {
-        ChatsPage.tapCloseChat()
+        ConversationPage.tapClose()
         ChatsPage.waitUntilDisplayed()
     }
 
@@ -54,4 +55,25 @@ object ChatSteps {
     fun checkChatInList(name: String) {
         ChatsPage.waitForChatCard(name)
     }
+
+    /** Finds the chat by its exact title in the chat list and opens it. */
+    fun openChat(name: String) {
+        ChatsPage.waitUntilDisplayed()
+        searchChat(name)
+        ChatsPage.tapOpenChat(name)
+        checkOpenedChat(name)
+    }
+
+    /** Test data preparation: reuses the chat when it already exists on the device, otherwise creates it. */
+    fun ensureChatExists(name: String, imageIndex: Int) {
+        ChatsPage.waitUntilDisplayed()
+        searchChat(name)
+        if (ChatsPage.isChatCardDisplayed(name, CHAT_LOOKUP_TIMEOUT_SEC)) return
+
+        createChat(name, imageIndex)
+        checkOpenedChat(name)
+        closeChat()
+    }
+
+    private const val CHAT_LOOKUP_TIMEOUT_SEC = 5L
 }

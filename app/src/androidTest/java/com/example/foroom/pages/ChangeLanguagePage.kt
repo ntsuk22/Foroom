@@ -6,7 +6,6 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.alternator.foroom.R
-import com.example.foroom.Helper.waitUntilVisible
 import org.hamcrest.Matcher
 
 /**
@@ -17,7 +16,7 @@ object ChangeLanguagePage {
     private val englishButton: Matcher<View> = withId(R.id.languageButtonEng)
 
     fun waitUntilDisplayed(timeoutSec: Long = SCREEN_TIMEOUT_SEC) {
-        onView(georgianButton).waitUntilVisible(timeoutSec)
+        waitUntilShown(georgianButton, timeoutSec)
         onView(englishButton).check(matches(isDisplayed()))
     }
 

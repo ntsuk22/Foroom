@@ -2,15 +2,19 @@ package com.example.foroom.pages
 
 import android.view.View
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.NoMatchingViewException
+import androidx.test.espresso.ViewInteraction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.replaceText
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayingAtLeast
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.util.TreeIterables
 import com.example.design_system.components.image_chooser.ImageChooserItemView
 import com.example.design_system.components.image_chooser.ImageChooserListView
-import com.example.foroom.Helper.waitUntilVisible
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
@@ -34,12 +38,70 @@ internal fun inputEditText(input: Matcher<View>): Matcher<View> =
 internal fun inputDescription(input: Matcher<View>): Matcher<View> =
     allOf(withId(DesignR.id.descriptionTextView), isDescendantOfA(input))
 
-internal fun typeInto(editText: Matcher<View>, text: String) {
-    onView(editText).waitUntilVisible(VIEW_TIMEOUT_SEC).perform(replaceText(text), closeSoftKeyboard())
+/**
+ * Waits until [view] is displayed. Unlike the Helper `waitUntilVisible`, it keeps waiting when the
+ * view already exists but is not displayed yet (Espresso reports that as an AssertionError).
+ */
+internal fun waitUntilShown(view: Matcher<View>, timeoutSec: Long): ViewInteraction {
+    waitUntilMatches(view, isDisplayed(), timeoutSec)
+    return onView(view)
 }
 
+internal fun typeInto(editText: Matcher<View>, text: String) {
+    waitUntilShown(editText, VIEW_TIMEOUT_SEC).perform(replaceText(text), closeSoftKeyboard())
+}
+
+/** Waits for the same condition `click()` requires (at least 90% of the view on screen), then taps it. */
 internal fun tapWhenVisible(view: Matcher<View>, timeoutSec: Long = VIEW_TIMEOUT_SEC) {
-    onView(view).waitUntilVisible(timeoutSec).perform(click())
+    waitUntilMatches(view, isDisplayingAtLeast(CLICKABLE_AREA_PERCENT), timeoutSec)
+    onView(view).perform(click())
+}
+
+private const val CLICKABLE_AREA_PERCENT = 90
+
+/** Checks once, without waiting, whether [view] exists and is displayed. */
+internal fun isDisplayedNow(view: Matcher<View>): Boolean = try {
+    onView(view).check(matches(isDisplayed()))
+    true
+} catch (_: NoMatchingViewException) {
+    false
+} catch (_: AssertionError) {
+    false
+}
+
+/** Waits until [view] is displayed; returns false instead of failing when the time runs out. */
+internal fun waitUntilDisplayed(view: Matcher<View>, timeoutSec: Long): Boolean {
+    val endTime = System.currentTimeMillis() + timeoutSec * 1000
+    while (true) {
+        if (isDisplayedNow(view)) return true
+        if (System.currentTimeMillis() > endTime) return false
+        Thread.sleep(POLL_INTERVAL_MS)
+    }
+}
+
+/** Waits until one of [views] is displayed and returns its index. */
+internal fun waitForAnyDisplayed(views: List<Matcher<View>>, timeoutSec: Long = RESPONSE_TIMEOUT_SEC): Int {
+    val endTime = System.currentTimeMillis() + timeoutSec * 1000
+    while (true) {
+        views.forEachIndexed { index, view -> if (isDisplayedNow(view)) return index }
+        if (System.currentTimeMillis() > endTime) throw TimeoutException("None of the expected views appeared in $timeoutSec sec")
+        Thread.sleep(POLL_INTERVAL_MS)
+    }
+}
+
+/** Waits until [view] matches [state]; the last failed check is rethrown when the time runs out. */
+internal fun waitUntilMatches(view: Matcher<View>, state: Matcher<View>, timeoutSec: Long = RESPONSE_TIMEOUT_SEC) {
+    val endTime = System.currentTimeMillis() + timeoutSec * 1000
+    while (true) {
+        try {
+            onView(view).check(matches(state))
+            return
+        } catch (error: Throwable) {
+            if (error !is NoMatchingViewException && error !is AssertionError) throw error
+            if (System.currentTimeMillis() > endTime) throw error
+        }
+        Thread.sleep(POLL_INTERVAL_MS)
+    }
 }
 
 /**

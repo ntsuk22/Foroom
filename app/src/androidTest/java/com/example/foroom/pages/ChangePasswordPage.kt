@@ -8,7 +8,6 @@ import androidx.test.espresso.matcher.ViewMatchers.withChild
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withParent
 import com.alternator.foroom.R
-import com.example.foroom.Helper.waitUntilVisible
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 import com.example.design_system.R as DesignR
@@ -25,7 +24,7 @@ object ChangePasswordPage {
     private val confirmButton: Matcher<View> = withId(DesignR.id.actionButton)
 
     fun waitUntilDisplayed(timeoutSec: Long = SCREEN_TIMEOUT_SEC) {
-        onView(repeatPasswordInput).waitUntilVisible(timeoutSec)
+        waitUntilShown(repeatPasswordInput, timeoutSec)
         onView(passwordInput).check(matches(isDisplayed()))
         onView(confirmButton).check(matches(isDisplayed()))
     }

@@ -8,7 +8,6 @@ import androidx.test.espresso.matcher.ViewMatchers.withChild
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withParent
 import com.alternator.foroom.R
-import com.example.foroom.Helper.waitUntilVisible
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 
@@ -26,7 +25,7 @@ object RegistrationPage {
     private val signUpButton: Matcher<View> = allOf(withId(R.id.signUpButton), withParent(registrationForm))
 
     fun waitUntilDisplayed(timeoutSec: Long = SCREEN_TIMEOUT_SEC) {
-        onView(repeatPasswordInput).waitUntilVisible(timeoutSec)
+        waitUntilShown(repeatPasswordInput, timeoutSec)
         onView(userNameInput).check(matches(isDisplayed()))
         onView(passwordInput).check(matches(isDisplayed()))
         onView(avatarList).check(matches(isDisplayed()))

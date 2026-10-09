@@ -6,7 +6,6 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.alternator.foroom.R
-import com.example.foroom.Helper.waitUntilVisible
 import org.hamcrest.Matcher
 
 /**
@@ -22,7 +21,7 @@ object CreateChatPage {
     fun tapCreateChatNavigation() = tapWhenVisible(createChatNavigationButton)
 
     fun waitUntilDisplayed(timeoutSec: Long = SCREEN_TIMEOUT_SEC) {
-        onView(createChatButton).waitUntilVisible(timeoutSec)
+        waitUntilShown(createChatButton, timeoutSec)
         onView(chatNameInput).check(matches(isDisplayed()))
         onView(chatImageChooser).check(matches(isDisplayed()))
     }

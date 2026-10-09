@@ -8,7 +8,6 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.alternator.foroom.R
-import com.example.foroom.Helper.waitUntilVisible
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 
@@ -25,7 +24,7 @@ object ProfilePage {
     fun tapProfileNavigation() = tapWhenVisible(profileNavigationButton)
 
     fun waitUntilDisplayed(timeoutSec: Long = SCREEN_TIMEOUT_SEC) {
-        onView(changeLanguageItem).waitUntilVisible(timeoutSec)
+        waitUntilShown(changeLanguageItem, timeoutSec)
         onView(changePasswordItem).check(matches(isDisplayed()))
         onView(signOutItem).check(matches(isDisplayed()))
     }
@@ -44,6 +43,6 @@ object ProfilePage {
         waitForLabel(signOutItem, label, timeoutSec)
 
     private fun waitForLabel(item: Matcher<View>, label: String, timeoutSec: Long) {
-        onView(allOf(withText(label), isDescendantOfA(item))).waitUntilVisible(timeoutSec)
+        waitUntilShown(allOf(withText(label), isDescendantOfA(item)), timeoutSec)
     }
 }
